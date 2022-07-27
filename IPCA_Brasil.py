@@ -24,7 +24,6 @@ if not existe:
 
 
 
-
 # -------------------- DOWNLOAD ARQUIVOS --------------------
 remote_url = 'https://ftp.ibge.gov.br/Precos_Indices_de_Precos_ao_Consumidor/IPCA/Serie_Historica/ipca_SerieHist.zip'
 arquivo_local = caminho + '/BRA_IPCA.zip'
@@ -130,4 +129,6 @@ for index, row in df.iterrows():
 
 cnxn.commit()
 cnxn.close()
+
+print('Tabela carregada no SQL Server com sucesso!')
 # -------------------- FIM SALVAR DF NO SQL SERVER --------------------
