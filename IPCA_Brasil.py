@@ -9,8 +9,6 @@ import pyodbc
 
 
 # -------------------- CRIAÇÃO PASTA --------------------
-
-final_caminho = "IPCA.xlsx"
 iso_pais = 'BRA'
 
 # Cria pasta para arquivos auxiliares
@@ -22,14 +20,12 @@ existe = os.path.exists(caminho)
 if not existe: 
     os.makedirs(caminho)
     print("Nova parta criada!")
-
 # -------------------- FIM CRIAÇÃO PASTA --------------------
 
 
 
 
 # -------------------- DOWNLOAD ARQUIVOS --------------------
-
 remote_url = 'https://ftp.ibge.gov.br/Precos_Indices_de_Precos_ao_Consumidor/IPCA/Serie_Historica/ipca_SerieHist.zip'
 arquivo_local = caminho + '/BRA_IPCA.zip'
 msg = request.urlretrieve(remote_url, arquivo_local)
@@ -49,7 +45,6 @@ else:
             zip_ref.extractall(caminho)
     else:
         print("Erro ao descompactar...")
-
 # -------------------- FIM DOWNLOAD ARQUIVOS --------------------
 
 
@@ -93,6 +88,7 @@ df = df.loc[pd.to_datetime(df['Period']) >= data_inicio]
 
 
 # -------------------- SALVAR DF LOCALMENTE --------------------
+final_caminho = "IPCA.xlsx"
 sheet_name = iso_pais
 
 if not os.path.isfile(final_caminho):
@@ -119,14 +115,14 @@ print("IPCA " + sheet_name + " salvo com sucesso")
 
 # -------------------- SALVAR DF NO SQL SERVER --------------------
 server = 'endereco_do_servidor'
-database = 'Nome_do_Banco_de_dados'
+database = 'bome_do_banco_de_dados'
 username = 'nome_usuario'
 password = 'minha_senha'
 
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 cursor = cnxn.cursor()
 
-cursor.execute("DELETE FROM acct_etl.IndexIPCA WHERE Country = 'PER'")
+cursor.execute("DELETE FROM acct_etl.IndexIPCA WHERE Country = 'BRA'")
 
 for index, row in df.iterrows():
     cursor.execute("INSERT INTO acct_etl.IndexIPCA (Country, Period, IPC_Index, IPC, IPCA, IPC12) values(?,?,?,?,?,?)",
