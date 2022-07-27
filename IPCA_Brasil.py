@@ -19,7 +19,7 @@ existe = os.path.exists(caminho)
 
 if not existe: 
     os.makedirs(caminho)
-    print("Nova parta criada!")
+    print(f'Nova pasta {caminho} criada!')
 # -------------------- FIM CRIAÇÃO PASTA --------------------
 
 
@@ -99,7 +99,7 @@ with pd.ExcelWriter(final_caminho, 'openpyxl', mode='a',if_sheet_exists='replace
         idx = writer.book.sheetnames.index(sheet_name)        
         # remove [sheet_name]
         writer.book.remove(writer.book.worksheets[idx])
-        # create an empty sheet [sheet_name] using old index
+        # crie uma planilha vazia [sheet_name] usando o índice antigo
         writer.book.create_sheet(sheet_name, idx)        
     else:
         writer.book.create_sheet(sheet_name)

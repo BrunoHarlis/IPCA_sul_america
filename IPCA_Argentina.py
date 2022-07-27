@@ -122,6 +122,7 @@ for data in tupla_ano_mes:
     if statinfo.st_size <= 99999:
         # Deletar arquivo
         os.remove(local_file)
+        print('Remove arquivo muito pequeno')
         print(msg)
 # -------------------- FIM DOWNLOAD DOS ARQUIVOS --------------------
 
@@ -195,7 +196,7 @@ with pd.ExcelWriter(final_caminho, 'openpyxl', mode='a',if_sheet_exists='replace
         idx = writer.book.sheetnames.index(sheet_name)
         # remove [sheet_name]
         writer.book.remove(writer.book.worksheets[idx])
-        # create an empty sheet [sheet_name] using old index
+        # crie uma planilha vazia [sheet_name] usando o índice antigo
         writer.book.create_sheet(sheet_name, idx)
     else:
         writer.book.create_sheet(sheet_name)
