@@ -165,7 +165,7 @@ print("IPCA " + sheet_name + " salvo com sucesso")
 
 # -------------------- SALVAR DF NO SQL SERVER --------------------
 server = 'endereco_do_servidor'
-database = 'bome_do_banco_de_dados'
+database = 'nome_do_banco_de_dados'
 username = 'nome_usuario'
 password = 'minha_senha'
 
