@@ -16,7 +16,7 @@ ano_inicio = ano_fim - 10
 # Dataframe principal que receberá todos os dados
 df = pd.DataFrame()
 
-print('Iniciando Web Scraping ...')
+print('Iniciando Web Scraping.')
 while ano_inicio <= ano_fim:
 
     # Define a URL que será usada para raspagem dos dados e verifica se é válida
@@ -38,12 +38,16 @@ while ano_inicio <= ano_fim:
         df = pd.concat([df, df_temp], ignore_index=True)
     
     ano_inicio += 1
+
+print('Web Scraping finalizado com sucesso!')
 # -------------------- FIM WEB SCRAPING --------------------
 
 
 
 
 # -------------------- TRANSFORMAÇÃO DOS DADOS 1 --------------------
+print('\nIniciando a transformação 1 do dados.')
+
 # Criar coluna 'Period' com o ano e mês
 df = df.astype({'ANO':'int64'})
 
@@ -71,6 +75,8 @@ df.insert(0, 'Country', 'ARG')
 df = df.rename(columns={'Interanual':'IPC12', 
                         'Acum. desde Enero':'IPCA', 
                         'Variación mensual':'IPC'})
+
+print('Transformação 1 dos dados finalizada com sucesso!')
 # -------------------- FIM TRANSFORMAÇÃO DOS DADOS 1 --------------------
 
 
@@ -152,6 +158,8 @@ df = pd.merge(df, df_IPC_Index, how="left", on=["Period"])
 
 
 # -------------------- TRANSFORMAÇÃO DOS DADOS 2 --------------------
+print('\nIniciando a transformação 2 do dados.')
+
 # Substituindo todos os valores NaN por 0 (zero)
 df.fillna(value= '0', inplace= True)
 
@@ -177,12 +185,16 @@ df['IPC_Index'] = pd.to_numeric(df['IPC_Index'], errors='coerce')
 
 # Ordenar DF por data
 df = df.sort_values(by=['Period'])
+
+print('Transformação 2 dos dados finalizada com sucesso!')
 # -------------------- FIM TRANSFORMAÇÃO DOS DADOS 2 --------------------
 
 
 
 
 # -------------------- SALVAR DF LOCALMENTE --------------------
+print('\nSalvando dados localmente.')
+
 final_caminho = 'IPCA.xlsx'
 sheet_name = iso_pais
 
@@ -211,6 +223,8 @@ print("IPCA " + sheet_name + " salvo com sucesso")
 
 
 # -------------------- SALVAR DF NO SQL SERVER --------------------
+print('\nCarregando os dados no SQL Server.')
+
 server = 'endereco_do_servidor'
 database = 'nome_do_banco_de_dados'
 username = 'nome_usuario'

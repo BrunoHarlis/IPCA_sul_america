@@ -156,6 +156,8 @@ df.drop(df.tail(12 - month).index, inplace=True)
 
 
 # -------------------- SALVAR DF LOCALMENTE --------------------
+print('\nSalvando dados localmente.')
+
 final_caminho = "IPCA.xlsx"
 sheet_name = iso_pais
 
@@ -182,6 +184,8 @@ print("IPCA " + sheet_name + " salvo com sucesso")
 
 
 # -------------------- SALVAR DF NO SQL SERVER --------------------
+print('\nCarregando os dados no SQL Server.')
+
 server = 'endereco_do_servidor'
 database = 'nome_do_banco_de_dados'
 username = 'nome_usuario'
