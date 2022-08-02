@@ -8,34 +8,28 @@ import pyodbc
 
 
 # -------------------- DOWNLOAD DOS ARQUIVOS --------------------
-iso_pais = 'PER'
-num_anos = 10
+iso_pais = 'URU'
 
 # Cria pasta para arquivos auxiliares
 caminho = './IPCA_' + iso_pais + '_Files'
 
-# Verifica se a pasta já existe
+# Verifica se o caminho foi criado ou não
 existe = os.path.exists(caminho)
 
 if not existe: 
     os.makedirs(caminho)
     print("\nNova pasta criada!")
 
-
-# Baixa arquivos
-# Índice nacional
-#remote_url = 'https://www.inei.gob.pe/media/MenuRecursivo/indices_tematicos/02_indice-precios_al_consumidor-nivel_nacional_2b_1.xlsx'
-#Antigo: 'https://www.inei.gob.pe/media/MenuRecursivo/indices_tematicos/02_indice-precios_al_consumidor-nivel_nacional_8.xlsx'
-remote_url = 'https://www.inei.gob.pe/media/MenuRecursivo/indices_tematicos/02_indice-precios_al_consumidor-nivel_nacional_2b_2.xlsx'
-
-# Área metropolitada
-#remote_url = 'https://www.inei.gob.pe/media/MenuRecursivo/indices_tematicos/01_indice-precios_al_consumidor-lm_2b_1.xlsx'
-#Antigo: 'https://www.inei.gob.pe/media/MenuRecursivo/indices_tematicos/01_indice-precios_al_consumidor-lm_8.xlsx'  
-
 print('\nIniciando o download dos dados')
-arquivo_local = caminho + '/' + 'IPCA_' + iso_pais + '.xlsx'
-msg = request.urlretrieve(remote_url, arquivo_local)
 
+remote_url = 'https://www.ine.gub.uy/c/document_library/get_file?uuid=2e92084a-94ec-4fec-b5ca-42b40d5d2826&groupId=10181'
+
+# Define o local onde os arquivos serão salvos 
+arquivo_local = caminho + '/' + iso_pais + 'IPCA.xls'
+
+# Download dos arquivos
+msg = request.urlretrieve(remote_url, arquivo_local)
+print(f'Arquivos baixados em: {msg}')
 
 # Verifique se arquivo for muito pequeno, provavelmente está com erro
 statinfo = os.stat(arquivo_local)
@@ -43,10 +37,7 @@ statinfo = os.stat(arquivo_local)
 if statinfo.st_size <= 9999:
     # Deletar arquivo
     os.remove(arquivo_local)
-    print('Arquivo muito pequelo. Provavelmente com erro.')
-    print('Apagando arquivo.')
-
-print('Fim do download')
+    print('Removendo arquivo muito pequeno.')
 # -------------------- FIM DOWNLOAD DOS ARQUIVOS --------------------
 
 
@@ -55,35 +46,31 @@ print('Fim do download')
 # -------------------- TRANSFORMAÇÃO DOS DADOS --------------------
 print('\nIniciando a transformação do dados.')
 
-# Define qual arquivo será importado
-aux = caminho + '\IPCA_' + iso_pais + '*.xlsx'
-nome_arquivo =  max(glob.glob(aux))
+nome_arquivo = max(glob.glob(caminho + "\*.xls"), key=os.path.getmtime)
+
+sheet =  'IPC_Cua 1'
+df = pd.read_excel(io=nome_arquivo, sheet_name=sheet, skiprows = range(1, 10), usecols = "A:E")
+
+# Define nome das colunas
+df.columns = ['Ano_Mes','IPC_Index','IPC','IPCA','IPC12']
+
+# Exclui linhas em branco
+df = df.dropna(how='all',axis=0) 
+df = df[df['IPC_Index'].notna()]
+
+df['Period'] = df.apply(lambda row: pd.to_datetime(row.Ano_Mes).strftime('%Y-%m')  , axis=1)
 
 
-array_meses = {'Enero': 1, 'Febrero': 2, 'Marzo': 3, 'Abril' : 4, 'Mayo' : 5, 'Junio' : 6, 'Julio' : 7,
-             'Agosto' : 8, 'Setiembre' : 9, 'Octubre' : 10, 'Noviembre' : 11, 'Diciembre' : 12}
-
-
-# Extrai dados do arquivo
-sheet =  'Base Dic.2021'
-df = pd.read_excel(io=nome_arquivo, sheet_name=sheet, skiprows = range(1, 3), usecols = "A:F", header=1)
-
-df.rename(columns = {'Año': 'ANO', 'Mes': 'MES', 'Índice' :'IPC Index',
-                    'Mensual': 'IPC', 'Acumulada':'IPCA', 'Anual':'IPC12'}, inplace = True)
-
-# Criação da coluna Period
-df['ANO'].fillna(method='ffill', inplace=True )
-df['Period'] = df.apply(lambda row: datetime(year=int(row.ANO), month=array_meses[row.MES], day=1).strftime('%Y-%m'), axis=1)
-df.drop(['MES', 'ANO'],axis=1,inplace=True)
-
-# Criação da coluna Country
+# Renomeia e ordena colunas 
 df.insert(0, 'Country', iso_pais)
 
-# Reorganizar colunas
-df = df[['Country','Period','IPC Index','IPC','IPCA','IPC12']]
+df = df.drop('Ano_Mes', 1)
+df = df[['Country','Period','IPC_Index','IPC','IPCA','IPC12']]
+
 
 # Filtra dados dos últimos 10 anos
-data_inicio = datetime(date.today().year - num_anos, 1,1)
+qtd_anos = 10
+data_inicio = datetime(date.today().year - qtd_anos, 1,1)
 df = df.loc[pd.to_datetime(df['Period']) >= data_inicio]
 
 print('Transformação dos dados finalizada com sucesso!')
@@ -131,7 +118,7 @@ password = 'minha_senha'
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password)
 cursor = cnxn.cursor()
 
-cursor.execute("DELETE FROM acct_etl.IndexIPCA WHERE Country = 'PER'")
+cursor.execute("DELETE FROM acct_etl.IndexIPCA WHERE Country = 'URU'")
 
 for index, row in df.iterrows():
     cursor.execute("INSERT INTO acct_etl.IndexIPCA (Country, Period, IPC_Index, IPC, IPCA, IPC12) values(?,?,?,?,?,?)",

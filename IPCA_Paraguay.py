@@ -47,6 +47,7 @@ print('Web Scraping finalizado com sucesso!')
 
 # -------------------- TRANSFORMAÇÃO DOS DADOS --------------------
 print('\nIniciando a transformação do dados.')
+
 # Criar coluna 'Period' com o ano e mês
 df = df.astype({'ANO':'int64'})
 

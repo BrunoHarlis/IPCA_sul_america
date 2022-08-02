@@ -52,6 +52,8 @@ def transform_DF(path_dataset, name_column):
 
 
 # -------------------- DOWNLOAD DOS ARQUIVOS --------------------
+print('\nIniciando o download dos dados')
+
 year = date.today().year
 month = date.today().month - 1
 
@@ -80,47 +82,54 @@ isExist = os.path.exists(path)
 
 if not isExist:
     os.mkdir(path)
-    print('New Directory Created Succesfully')
+    print("\nNova pasta criada!")
 
 
 # This cell will take a little time. The zip is a very heavy file.
-localfile = path + '/ECU.zip'
+arquivo_local = path + '/ECU.zip'
 
 
 # Download dos arquivos
-msg = request.urlretrieve(html, localfile)
+msg = request.urlretrieve(html, arquivo_local)
+print(f'Arquivos baixados em: {msg}')
 # -------------------- FIM DOWNLOAD DOS ARQUIVOS --------------------
 
 
 
 
 # -------------------- DESCOMPACTAÇÃO DOS ARQUIVOS BAIXADOS --------------------
-def unzipFile(localfile, path):
+print('\nIniciando descompactação dos arquivos.')
+
+def unzipFile(arquivo_local, path):
 
     # Unzip file
-    if os.path.exists(localfile):
-        with zipfile.ZipFile(localfile, 'r') as zip_ref:
+    if os.path.exists(arquivo_local):
+        with zipfile.ZipFile(arquivo_local, 'r') as zip_ref:
             zip_ref.extractall(path)     
     else:
         print("Something Is wrong")
 
 
 # Primeira descompactação
-unzipFile(localfile, path)
-os.remove(localfile)
+unzipFile(arquivo_local, path)
+os.remove(arquivo_local)
 
 
 # Segunda descompactação
-localfile = path + '/Tabulados y series historicas_CSV'
-paths = [os.path.join(localfile, name) for name in os.listdir(localfile)]
+arquivo_local = path + '/Tabulados y series historicas_CSV'
+paths = [os.path.join(arquivo_local, name) for name in os.listdir(arquivo_local)]
 unzipFile(paths[3], path)
-rmtree(localfile)
+rmtree(arquivo_local)
+
+print('Arquivos descompactados com sucesso!')
 # -------------------- FIM DESCOMPACTAÇÃO DOS ARQUIVOS BAIXADOS --------------------
 
 
 
 
 # -------------------- TRANSFORMAÇÃO DOS DADOS --------------------
+print('\nIniciando a transformação do dados.')
+
 # Cria uma lista com os caminhos dos arquivos CSV
 path_list = os.listdir(path)
 path = path +'/'+ path_list[0]
@@ -144,12 +153,14 @@ df = pd.merge(df, df_ipc12, how="left", on=["Period"])
 df.insert(0, 'Country', 'ECU')
 
 
-#Reoder columns
+# Reoder colunas
 df = df[['Country','Period','IPC_Index','IPC','IPCA','IPC12']]
 
 
 # Drop datas futuras com valores ainda inexistentes
 df.drop(df.tail(12 - month).index, inplace=True)
+
+print('Transformação dos dados finalizada com sucesso!')
 # -------------------- FIM TRANSFORMAÇÃO DOS DADOS --------------------
 
 
